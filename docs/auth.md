@@ -20,7 +20,8 @@ Process:
 
 - Uses the Chrome DevTools Protocol (CDP), which is supported by Chromium-based browsers. Searches for Chrome, Edge, Chromium, Brave, Vivaldi, and Opera in known application locations and on `PATH`. `SLACKCLI_BROWSER` overrides the binary path or command name; the legacy `CHROME_APP` variable is also supported.
 - Browser profile persists at `~/.config/slackcli/chrome-profile` (override with `SLACKCLI_BROWSER_PROFILE`; `SLACKCLI_CHROME_PROFILE` remains supported) so you only need to log in once; subsequent runs reuse the saved session.
-- If a Chromium-based browser is already running on CDP port 9235, it is reused rather than launching a new instance.
+- If CDP port `9235` is already in use, the CLI reuses that browser instead of launching the selected browser. `SLACKCLI_BROWSER` selects the executable only when the port is free.
+- To force the requested browser, quit the browser that owns port `9235` before login. Inspect the listener with `lsof -nP -iTCP:9235 -sTCP:LISTEN`; the CLI connects to CDP on `127.0.0.1:9235`.
 - Opens a browser window at the workspace URL pointing to the login page. Log in normally; the CLI detects completion automatically.
 - Extracts the xoxc token via CDP: `Runtime.evaluate` polls `localConfig_v2` in localStorage.
 - Extracts the xoxd cookie via CDP: `Network.getCookies` reads the `d` cookie.

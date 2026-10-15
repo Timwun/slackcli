@@ -114,13 +114,14 @@ To permit writing to a new channel, add its ID to `internal/slack/allowlist.txt`
 Flow:
 1. `FindChromiumBinary()` searches for Chromium-based browsers at well-known application paths and on `PATH`. `SLACKCLI_BROWSER` overrides the search; `CHROME_APP` remains supported for compatibility.
 2. `chromiumProfileDir()` returns `~/.config/slackcli/chrome-profile` (overridden by `SLACKCLI_BROWSER_PROFILE`; `SLACKCLI_CHROME_PROFILE` remains supported).
-3. If CDP port 9235 is not reachable, `launchChromium()` spawns the binary with `--remote-debugging-port=9235`.
-4. `cdpFindOrOpenPage()` navigates a tab to the workspace URL.
-5. `cdpExtractCredentials()` polls every 2s via `cdpConnect` (a hand-rolled RFC 6455 WebSocket client):
+3. If CDP port 9235 is already reachable, the CLI reuses that endpoint without checking whether it belongs to the executable selected by `SLACKCLI_BROWSER`. To force the selected browser, stop the existing CDP listener before login.
+4. If CDP port 9235 is not reachable, `launchChromium()` spawns the selected binary with `--remote-debugging-port=9235`.
+5. `cdpFindOrOpenPage()` navigates a tab to the workspace URL.
+6. `cdpExtractCredentials()` polls every 2s via `cdpConnect` (a hand-rolled RFC 6455 WebSocket client):
    - `Runtime.evaluate` reads the xoxc token from `localStorage.localConfig_v2`.
    - `Network.getCookies` reads the `"d"` session cookie.
    Both must be present before the function returns.
-6. The tab is closed and the Chromium browser is killed (if we launched it).
+7. The tab is closed and the Chromium browser is killed (if we launched it).
 
 `chromeUA` in `client.go` must match the Chrome major version in use.
 ## Markdown → mrkdwn conversion
